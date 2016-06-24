@@ -1,4 +1,9 @@
-//#include "WProgram.h"
+/* Project: Ewaste 3D Printer
+ * Module: main.cpp
+ * Functionality: The main execution file
+ */
+
+// System includes
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 
@@ -9,6 +14,9 @@
 #include <usb_rawhid.h>
 
 #include <IntervalTimer.h>
+
+// Custom includes
+#include <motor.h>
 
 // Preprocessor macros
 #define TIMEOUT_RECV 	0 		// USB receive timeout.
@@ -30,22 +38,26 @@ int main(void)
 	uint8_t nbytes;
 
 	// Start timer.
-	led_timer.begin(led_blink_func, delay_val);
+	//led_timer.begin(led_blink_func, delay_val);
 
 	// Initialize USB.
-	usb_init();
+	//usb_init();
+
+	// Initialize motor peripherals.
+	motor_init();
 
 	// I want to control an LED.
 	pinMode(LED, OUTPUT);
 
 	// Halt till the device configures itself.
-	while(!usb_rawhid_available());
+	//while(!usb_rawhid_available());
 
 	// Give some time for the host to settle as well.
-	delay(1000);
+	//delay(1000);
 
 	while (1)
 	{
+		/*
 		// Receive and echo the packet.
 		nbytes = usb_rawhid_recv(usb_buffer, TIMEOUT_RECV);
 		
@@ -59,6 +71,18 @@ int main(void)
 			led_timer.begin(led_blink_func, delay_val*1000);
 
 		}
+		*/
+		// I want to test X motor.
+		if (digitalRead(MOTOR_Y_SW1) == LOW)
+			digitalWrite(MOTOR_Y_DIR, LOW);
+		
+		if (digitalRead(MOTOR_Y_SW2) == LOW)
+			digitalWrite(MOTOR_Y_DIR, HIGH);
+
+		digitalWrite(MOTOR_Y_STP, HIGH);
+		delayMicroseconds(400);
+		digitalWrite(MOTOR_Y_STP, LOW);
+		delayMicroseconds(400);
 	}
 }
 
