@@ -12,6 +12,7 @@ http://www.instructables.com/id/eWaste-60-3DPrinter/
 1. Teensy LC
 2. Pololu 8843 drivers for stepper motors
 3. L293D for DC motors
+4. SMPS power supply
 
 ## Software
 1. Teensy template at http://github.com/apmorton/teensy-template

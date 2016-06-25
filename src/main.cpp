@@ -22,6 +22,7 @@
 #define TIMEOUT_RECV 	0 		// USB receive timeout.
 #define TIMEOUT_SEND 	50 		// USB send timeout.
 #define LED 			13 		// LED pin number.
+#define MOTOR_DELAY 	600  	// Stepper motor delay time.
 
 // USB buffer
 uint8_t usb_buffer[64];
@@ -29,13 +30,14 @@ uint8_t usb_buffer[64];
 // Create an LED blink timer object.
 IntervalTimer led_timer;
 int led_state = LOW;
-void led_blink_func(void);
 
 int main(void)
 {
 	// Variables
 	uint8_t delay_val = 255;
 	uint8_t nbytes;
+
+	uint8_t x_dir = 0, y_dir = 0, x_state = 0, y_state = 0, z_dir = 0, z_state = 0;
 
 	// Start timer.
 	//led_timer.begin(led_blink_func, delay_val);
@@ -72,26 +74,29 @@ int main(void)
 
 		}
 		*/
-		// I want to test X motor.
-		if (digitalRead(MOTOR_Y_SW1) == LOW)
-			digitalWrite(MOTOR_Y_DIR, LOW);
-		
-		if (digitalRead(MOTOR_Y_SW2) == LOW)
-			digitalWrite(MOTOR_Y_DIR, HIGH);
 
-		digitalWrite(MOTOR_Y_STP, HIGH);
-		delayMicroseconds(400);
-		digitalWrite(MOTOR_Y_STP, LOW);
-		delayMicroseconds(400);
+		// See if we need to switch direction.
+		if (x_state == MOTOR_SW1_ON)
+			x_dir = 1;
+		if (x_state == MOTOR_SW2_ON)
+			x_dir = 0;
+
+		if (y_state == MOTOR_SW1_ON)
+			y_dir = 1;
+		if (y_state == MOTOR_SW2_ON)
+			y_dir = 0;
+
+		if (z_state == MOTOR_SW1_ON)
+			z_dir = 1;
+		if (z_state == MOTOR_SW2_ON)
+			z_dir = 0;
+
+		// Move the motors a step.
+		//x_state = _motor_x_move(x_dir);
+		//y_state = _motor_y_move(y_dir);
+		z_state = _motor_z_move(z_dir);
+
+		delay(STEP_DURATION);
+
 	}
-}
-
-void led_blink_func(void)
-{
-	if(led_state == LOW)
-		led_state = HIGH;
-	else
-		led_state = LOW;
-
-	digitalWrite(LED, led_state);
 }

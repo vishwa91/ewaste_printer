@@ -39,6 +39,9 @@ void motor_init(void)
 	// And so are DC motor pins
 	pinMode(MOTOR_Z_PLS, OUTPUT);
 	pinMode(MOTOR_Z_MNS, OUTPUT);
+
+	// Attach interrupt to encoder pin
+	attachInterrupt(digitalPinToInterrupt(MOTOR_Z_ENC), enc_isr, RISING);
 }
 
 // Calibration routines
@@ -58,7 +61,48 @@ uint16_t motor_z_calib(void)
 }
 
 // Motion routines
-void motor_x_move(int dir, int nsteps)
+uint8_t _motor_x_move(int dir)
 {
+	// Write the direction
+	digitalWrite(MOTOR_X_DIR, dir);
+
+	// Send a pulse to the motor driver
+	digitalWrite(MOTOR_X_STP, HIGH);
+	delayMicroseconds(MOTOR_STP_INTERVAL);
+	digitalWrite(MOTOR_X_STP, LOW);
+
+	// Return switch status
+	return 2*digitalRead(MOTOR_X_SW1) + digitalRead(MOTOR_X_SW2);
 }
 
+// Motion routines
+uint8_t _motor_y_move(int dir)
+{
+	// Write the direction
+	digitalWrite(MOTOR_Y_DIR, dir);
+
+	// Send a pulse to the motor driver
+	digitalWrite(MOTOR_Y_STP, HIGH);
+	delayMicroseconds(MOTOR_STP_INTERVAL);
+	digitalWrite(MOTOR_Y_STP, LOW);
+
+	// Return switch status
+	return 2*digitalRead(MOTOR_Y_SW1) + digitalRead(MOTOR_Y_SW2);
+}
+
+uint8_t _motor_z_move(int dir)
+{
+	if (dir == 0)
+		digitalWrite(MOTOR_Z_PLS, HIGH);
+	else
+		digitalWrite(MOTOR_Z_MNS, HIGH);
+
+	return 2*digitalRead(MOTOR_Z_SW1) + digitalRead(MOTOR_Z_SW2);
+}
+
+void enc_isr(void)
+{
+	// Simply shut down the DC motor outputs.
+	digitalWrite(MOTOR_Z_PLS, LOW);
+	digitalWrite(MOTOR_Z_MNS, LOW);
+}
