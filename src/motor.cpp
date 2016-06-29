@@ -92,10 +92,10 @@ uint8_t _motor_y_move(int dir)
 
 uint8_t _motor_z_move(int dir)
 {
-	if (dir == 0)
-		digitalWrite(MOTOR_Z_PLS, HIGH);
-	else
+	if (dir == DIR1)
 		digitalWrite(MOTOR_Z_MNS, HIGH);
+	else
+		digitalWrite(MOTOR_Z_PLS, HIGH);
 
 	return 2*digitalRead(MOTOR_Z_SW1) + digitalRead(MOTOR_Z_SW2);
 }

@@ -27,39 +27,29 @@
 // USB buffer
 uint8_t usb_buffer[64];
 
-// Create an LED blink timer object.
-IntervalTimer led_timer;
-int led_state = LOW;
-
 int main(void)
 {
 	// Variables
-	uint8_t delay_val = 255;
+	uint8_t delay_val = 1;
 	uint8_t nbytes;
 
-	uint8_t x_dir = 0, y_dir = 0, x_state = 0, y_state = 0, z_dir = 0, z_state = 0;
-
-	// Start timer.
-	//led_timer.begin(led_blink_func, delay_val);
+	uint8_t x_dir = 0, y_dir = 0, z_dir = 0;
+	uint8_t x_state = 0, y_state = 0, z_state = 0;
 
 	// Initialize USB.
-	//usb_init();
+	usb_init();
 
 	// Initialize motor peripherals.
 	motor_init();
 
-	// I want to control an LED.
-	pinMode(LED, OUTPUT);
-
 	// Halt till the device configures itself.
-	//while(!usb_rawhid_available());
+	while(!usb_rawhid_available());
 
 	// Give some time for the host to settle as well.
-	//delay(1000);
+	delay(1000);
 
 	while (1)
 	{
-		/*
 		// Receive and echo the packet.
 		nbytes = usb_rawhid_recv(usb_buffer, TIMEOUT_RECV);
 		
@@ -67,36 +57,30 @@ int main(void)
 		{
 			// Read the delay between blinks
 			delay_val = usb_buffer[0];
-
-			// Restart timer.
-			led_timer.end();
-			led_timer.begin(led_blink_func, delay_val*1000);
-
 		}
-		*/
 
 		// See if we need to switch direction.
 		if (x_state == MOTOR_SW1_ON)
-			x_dir = 1;
+			x_dir = DIR2;
 		if (x_state == MOTOR_SW2_ON)
-			x_dir = 0;
+			x_dir = DIR1;
 
 		if (y_state == MOTOR_SW1_ON)
-			y_dir = 1;
+			y_dir = DIR2;
 		if (y_state == MOTOR_SW2_ON)
-			y_dir = 0;
+			y_dir = DIR1;
 
 		if (z_state == MOTOR_SW1_ON)
-			z_dir = 1;
+			z_dir = DIR2;
 		if (z_state == MOTOR_SW2_ON)
-			z_dir = 0;
+			z_dir = DIR1;
 
 		// Move the motors a step.
-		//x_state = _motor_x_move(x_dir);
-		//y_state = _motor_y_move(y_dir);
+		x_state = _motor_x_move(x_dir);
+		y_state = _motor_y_move(y_dir);
 		z_state = _motor_z_move(z_dir);
 
-		delay(STEP_DURATION);
+		delay(delay_val);
 
 	}
 }

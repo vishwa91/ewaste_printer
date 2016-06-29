@@ -35,7 +35,10 @@
 #define MOTOR_SW2_ON 		1 		// Limiting switch 2 is on
 
 #define MOTOR_STP_INTERVAL  20 		// Duration of pulse in microseconds
-#define STEP_DURATION 		600 	// Duration of a motor step.
+#define STEP_DURATION 		1 		// Duration of a motor step.
+
+#define DIR1 				0 		// Approaching SW1
+#define DIR2 				1 		// Approaching SW2
 
 void motor_init(void); 							// Motor initialization routines
 
