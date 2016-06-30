@@ -47,17 +47,95 @@ void motor_init(void)
 // Calibration routines
 uint16_t motor_x_calib(void)
 {
-	return 0;
+	uint16_t nsteps = 0;
+	uint8_t state;
+
+	// Move a step to get status
+	state = _motor_x_move(DIR1);
+	delayMicroseconds(MOTOR_X_CALIB_TIME);
+
+	// Debugging
+	digitalWrite(LED, LOW);
+
+	// Move towards SW1 and then halt.
+	while(state != MOTOR_SW1_ON)
+	{
+		state = _motor_x_move(DIR1);
+		delayMicroseconds(MOTOR_X_CALIB_TIME);
+	}
+
+	// Now the motor is at switch 1. We can start count.
+	while(state != MOTOR_SW2_ON)
+	{
+		state = _motor_x_move(DIR2);
+		delayMicroseconds(MOTOR_X_CALIB_TIME);
+		nsteps += 1;
+	}
+	digitalWrite(LED, HIGH);
+
+	return nsteps;
 }
 
 uint16_t motor_y_calib(void)
 {
-	return 0;
+	uint16_t nsteps = 0;
+	uint8_t state;
+
+	// Move a step to get status
+	state = _motor_y_move(DIR1);
+	delayMicroseconds(MOTOR_X_CALIB_TIME);
+
+	// Debugging
+	digitalWrite(LED, LOW);
+
+	// Move towards SW1 and then halt.
+	while(state != MOTOR_SW1_ON)
+	{
+		state = _motor_y_move(DIR1);
+		delayMicroseconds(MOTOR_X_CALIB_TIME);
+	}
+
+	// Now the motor is at switch 1. We can start count.
+	while(state != MOTOR_SW2_ON)
+	{
+		state = _motor_y_move(DIR2);
+		delayMicroseconds(MOTOR_X_CALIB_TIME);
+		nsteps += 1;
+	}
+	digitalWrite(LED, HIGH);
+
+	return nsteps;
 }
 
 uint16_t motor_z_calib(void)
 {
-	return 0;
+	uint16_t nsteps = 0;
+	uint8_t state;
+
+	// Move a step to get status
+	state = _motor_z_move(DIR1);
+	delay(MOTOR_Z_CALIB_TIME);
+
+	// Debugging
+	digitalWrite(LED, LOW);
+
+	// Move towards SW1 and then halt.
+	while(state != MOTOR_SW1_ON)
+	{
+		state = _motor_z_move(DIR1);
+		delay(MOTOR_Z_CALIB_TIME);
+	}
+
+	// Now the motor is at switch 1. We can start count.
+	while(state != MOTOR_SW2_ON)
+	{
+		state = _motor_z_move(DIR2);
+		delay(MOTOR_Z_CALIB_TIME);
+		nsteps += 1;
+	}
+	digitalWrite(LED, HIGH);
+
+	return nsteps;
 }
 
 // Motion routines

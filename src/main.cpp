@@ -10,22 +10,11 @@
 #include <avr_functions.h>
 #include <avr_emulation.h>
 
-#include <usb_dev.h>
-#include <usb_rawhid.h>
-
 #include <IntervalTimer.h>
 
 // Custom includes
 #include <motor.h>
-
-// Preprocessor macros
-#define TIMEOUT_RECV 	0 		// USB receive timeout.
-#define TIMEOUT_SEND 	50 		// USB send timeout.
-#define LED 			13 		// LED pin number.
-#define MOTOR_DELAY 	600  	// Stepper motor delay time.
-
-// USB buffer
-uint8_t usb_buffer[64];
+#include <usb.h>
 
 int main(void)
 {
@@ -35,6 +24,12 @@ int main(void)
 
 	uint8_t x_dir = 0, y_dir = 0, z_dir = 0;
 	uint8_t x_state = 0, y_state = 0, z_state = 0;
+
+	uint16_t calib_steps = 0;
+
+	// Switch on LED to say that it's idle.
+	pinMode(LED, OUTPUT);
+	digitalWrite(LED, HIGH);
 
 	// Initialize USB.
 	usb_init();
@@ -51,14 +46,41 @@ int main(void)
 	while (1)
 	{
 		// Receive and echo the packet.
-		nbytes = usb_rawhid_recv(usb_buffer, TIMEOUT_RECV);
-		
-		if (nbytes > 0)
-		{
-			// Read the delay between blinks
-			delay_val = usb_buffer[0];
-		}
+		nbytes = usb_recv();
 
+		// Do nothing if no bytes are received.
+		if (nbytes == 0)
+			continue;		
+
+		// Calibration check
+		if (usb_in_buffer[0] == CMD_CALIB)
+		{
+			if (usb_in_buffer[1] == CMD_CALIB_X)
+				calib_steps = motor_x_calib();
+
+			// Load data into buffer.
+			usb_out_buffer[0] = (uint8_t)(calib_steps & 0xff);
+			usb_out_buffer[1] = (uint8_t)((calib_steps >> 8) & 0xff);
+
+			if (usb_in_buffer[1] == CMD_CALIB_Y)
+				calib_steps = motor_y_calib();
+
+			// Load data into buffer.
+			usb_out_buffer[0] = (uint8_t)(calib_steps & 0xff);
+			usb_out_buffer[1] = (uint8_t)((calib_steps >> 8) & 0xff);
+
+			if (usb_in_buffer[1] == CMD_CALIB_Z)
+				calib_steps = motor_z_calib();
+
+			// Load data into buffer.
+			usb_out_buffer[0] = (uint8_t)(calib_steps & 0xff);
+			usb_out_buffer[1] = (uint8_t)((calib_steps >> 8) & 0xff);
+
+		}
+		// Send USB data
+		usb_send();
+
+		/*
 		// See if we need to switch direction.
 		if (x_state == MOTOR_SW1_ON)
 			x_dir = DIR2;
@@ -81,6 +103,6 @@ int main(void)
 		z_state = _motor_z_move(z_dir);
 
 		delay(delay_val);
-
+		*/
 	}
 }

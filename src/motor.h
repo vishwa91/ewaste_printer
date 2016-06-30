@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <avr_emulation.h>
 
+#define LED 				13 		// LED for debugging purposes
+
 #define MOTOR_X_SW2 		23 		// Limiting switch 1
 #define MOTOR_X_SW1  		22 		// Limiting switch 2
 #define MOTOR_X_DIR 		21 		// Motor direction pin
@@ -37,8 +39,16 @@
 #define MOTOR_STP_INTERVAL  20 		// Duration of pulse in microseconds
 #define STEP_DURATION 		1 		// Duration of a motor step.
 
+#define MOTOR_X_CALIB_TIME  600		// X and Y calibration step interval
+#define MOTOR_Z_CALIB_TIME 	5 		// Z calibration step interval
+
 #define DIR1 				0 		// Approaching SW1
 #define DIR2 				1 		// Approaching SW2
+
+#define CMD_CALIB 			'C' 	// First USB byte for calibration
+#define CMD_CALIB_X 		'X' 	// Second byte for X calibration
+#define CMD_CALIB_Y 		'Y' 	// Second byte for Y calibration
+#define CMD_CALIB_Z 		'Z' 	// Second byte for Z calibration
 
 void motor_init(void); 							// Motor initialization routines
 
