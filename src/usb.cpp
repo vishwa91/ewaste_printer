@@ -4,6 +4,7 @@
  */
 
 #include <usb.h>
+#include <avr_emulation.h>
 
 // Buffers
 uint8_t usb_in_buffer[BUF_SIZE];
@@ -17,4 +18,10 @@ uint8_t usb_recv(void)
 void usb_send(void)
 {
 	usb_rawhid_send(usb_out_buffer, TIMEOUT_SEND);
+}
+
+void usb_wait(void)
+{
+	while(!usb_rawhid_available());
+	delay(USB_WAIT);
 }

@@ -4,6 +4,9 @@
  *  			  control
  */
 
+#ifndef MOTOR_H_
+#define MOTOR_H_
+
 #include <stdint.h>
 #include <avr_emulation.h>
 
@@ -45,12 +48,18 @@
 #define DIR1 				0 		// Approaching SW1
 #define DIR2 				1 		// Approaching SW2
 
+#define ENABLE 				1 		// Enable a functionality
+#define DISABLE 			0 		// Disable a functionality
+
 #define CMD_CALIB 			'C' 	// First USB byte for calibration
 #define CMD_CALIB_X 		'X' 	// Second byte for X calibration
 #define CMD_CALIB_Y 		'Y' 	// Second byte for Y calibration
 #define CMD_CALIB_Z 		'Z' 	// Second byte for Z calibration
 
 void motor_init(void); 							// Motor initialization routines
+
+void busy(void); 								// System busy
+void idle(void); 								// System free
 
 uint16_t motor_x_calib(void); 					// X axis calibration
 uint16_t motor_y_calib(void); 					// Y axis calibration
@@ -64,4 +73,13 @@ uint8_t motor_x_move(int dir, int nsteps); 		// X axis motion
 uint8_t motor_y_move(int dir, int nsteps); 		// Y axis motion
 uint8_t motor_z_move(int dir, int nsteps); 		// Z axis motion
 
+void test_exec(void);							// Test mode execution
+
 void enc_isr(void); 							// Encoder ISR
+
+// Global motor related variables
+extern uint8_t x_state, y_state, z_state;
+extern uint8_t x_test, y_test, z_test;
+extern uint8_t x_dir, y_dir, z_dir;
+
+#endif

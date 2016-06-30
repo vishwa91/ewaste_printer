@@ -6,10 +6,26 @@
 
 #include <motor.h>
 
+// Global variables
+uint8_t x_state = MOTOR_OK;
+uint8_t y_state = MOTOR_OK;
+uint8_t z_state = MOTOR_OK;
+
+uint8_t x_dir = DIR1;
+uint8_t y_dir = DIR1;
+uint8_t z_dir = DIR1;
+
+uint8_t x_test = DISABLE;
+uint8_t y_test = DISABLE;
+uint8_t z_test = DISABLE;
+
 void motor_init(void)
 {
 	// Set directions for all pins
-	
+
+	// LED is output
+	pinMode(LED, OUTPUT);
+
 	// All limiting switches are inputs
 	pinMode(MOTOR_X_SW1, INPUT);
 	pinMode(MOTOR_X_SW2, INPUT);
@@ -42,6 +58,16 @@ void motor_init(void)
 
 	// Attach interrupt to encoder pin
 	attachInterrupt(digitalPinToInterrupt(MOTOR_Z_ENC), enc_isr, RISING);
+}
+
+void busy(void)
+{
+	digitalWrite(LED, LOW);
+}
+
+void idle(void)
+{
+	digitalWrite(LED, HIGH);
 }
 
 // Calibration routines
@@ -176,6 +202,41 @@ uint8_t _motor_z_move(int dir)
 		digitalWrite(MOTOR_Z_PLS, HIGH);
 
 	return 2*digitalRead(MOTOR_Z_SW1) + digitalRead(MOTOR_Z_SW2);
+}
+
+void test_exec(void)
+{
+	if (x_test == ENABLE)
+	{
+		if (x_state == MOTOR_SW1_ON)
+			x_dir = DIR2;
+		if (x_state == MOTOR_SW2_ON)
+			x_dir = DIR1;
+
+		_motor_x_move(x_dir);
+	}
+
+	if (y_test == ENABLE)
+	{
+		if (y_state == MOTOR_SW1_ON)
+			y_dir = DIR2;
+		if (y_state == MOTOR_SW2_ON)
+			y_dir = DIR1;
+
+		_motor_y_move(y_dir);
+	}
+
+	if (z_test == ENABLE)
+	{
+		if (z_state == MOTOR_SW1_ON)
+			z_dir = DIR2;
+		if (z_state == MOTOR_SW2_ON)
+			z_dir = DIR1;
+
+		_motor_z_move(z_dir);
+	}
+
+	delay(STEP_DURATION);
 }
 
 void enc_isr(void)
