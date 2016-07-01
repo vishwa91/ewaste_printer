@@ -50,8 +50,9 @@ int main(void)
 		if (x_test || y_test || z_test)
 			test_exec();
 
-		// Send USB data
-		usb_send();
+		// Send USB data only if status is asked
+		if (usb_in_buffer[1] == CMD_STS)
+			usb_send();
 
 	}
 }

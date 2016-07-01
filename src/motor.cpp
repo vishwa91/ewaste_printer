@@ -57,7 +57,7 @@ void motor_init(void)
 	pinMode(MOTOR_Z_MNS, OUTPUT);
 
 	// Attach interrupt to encoder pin
-	attachInterrupt(digitalPinToInterrupt(MOTOR_Z_ENC), enc_isr, RISING);
+	attachInterrupt(digitalPinToInterrupt(MOTOR_Z_ENC), enc_isr, CHANGE);
 }
 
 void busy(void)
@@ -275,9 +275,11 @@ uint8_t _motor_y_move(int dir)
 uint8_t _motor_z_move(int dir)
 {
 	if (dir == DIR1)
-		digitalWrite(MOTOR_Z_MNS, HIGH);
+		//digitalWrite(MOTOR_Z_MNS, HIGH);
+		analogWrite(MOTOR_Z_MNS, MOTOR_Z_PWM_VAL);
 	else
-		digitalWrite(MOTOR_Z_PLS, HIGH);
+		//digitalWrite(MOTOR_Z_PLS, HIGH);
+		analogWrite(MOTOR_Z_PLS, MOTOR_Z_PWM_VAL);
 
 	return get_z_state();
 }
@@ -322,9 +324,6 @@ void enc_isr(void)
 	// Disable interrupts for a while.
 	__disable_irq();
 	
-	// Wait for a while before switching off the motor.
-	delayMicroseconds(10);
-
 	// Simply shut down the DC motor outputs.
 	digitalWrite(MOTOR_Z_PLS, LOW);
 	digitalWrite(MOTOR_Z_MNS, LOW);

@@ -42,8 +42,9 @@
 #define MOTOR_STP_INTERVAL  100		// Duration of pulse in microseconds
 #define STEP_DURATION 		1 		// Duration of a motor step.
 
-#define MOTOR_X_CALIB_TIME  2		// X and Y calibration step interval
-#define MOTOR_Z_CALIB_TIME 	10 		// Z calibration step interval
+#define MOTOR_X_CALIB_TIME  1		// X and Y calibration step interval
+#define MOTOR_Z_CALIB_TIME 	5 		// Z calibration step interval
+#define MOTOR_Z_PWM_VAL 	180 	// Z axis PWM value
 
 #define DIR1 				0 		// Approaching SW1
 #define DIR2 				1 		// Approaching SW2

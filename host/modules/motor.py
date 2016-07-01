@@ -32,6 +32,11 @@ x_pos = 0                   # Current position of X
 y_pos = 0                   # Current position of Y
 z_pos = 0                   # Current position of Z
 
+# Constants from firmware
+MOTOR_OK        = 3
+MOTOR_SW1_ON    = 2
+MOTOR_SW2_ON    = 1
+
 def steps_calibrate():
     '''
         Function to calibrate the steps per each motor in the printer.
@@ -106,54 +111,24 @@ def move(axis, nsteps, direction, delay=0.1):
             moved_steps: The number of actual steps moved.
     '''
     moved_steps = 0
-
     for idx in range(nsteps):
-        err_state = _move(axis, direction)
-        time.sleep(delay)
+        dev.write('M'+axis+chr(direction)+chr(1))
 
-        if err_state == -1:
+        # Get status to see if we have hit border.
+        [sx, sy, sz] = get_status();
+        if axis == 'X':
+            status = sx
+        elif axis == 'Y':
+            status = sy
+        else:
+            status = sz
+
+        if (direction == DIR1 and status == MOTOR_SW1_ON) or (
+            direction == DIR2 and status == MOTOR_SW2_ON):
             return moved_steps
 
         moved_steps += 1
+        time.sleep(delay)
 
     return moved_steps
-
-def _move(axis, direction):
-    '''
-        Function to move an axis by a single step.
-
-        Inputs:
-            axis: Axis to move, 'X', 'Y', or 'Z'
-            direction: Direction to move motor
-
-        Outputs:
-            err_state: 0 if axis isn't at extremum, -1 otherwise.
-    '''
-    global x_pos, y_pos, z_pos
-
-    if axis == 'X':
-        if (x_pos == 0 and direction == DIR1) or (
-            x_pos == max_x and direction == DIR2):
-            return -1
-
-        dev.write('MX'+chr(direction)+chr(1));
-        x_pos += 2*direction - 1;
-
-    elif axis == 'Y':
-        if (y_pos == 0 and direction == DIR1) or (
-            y_pos == max_y and direction == DIR2):
-            return -1
-
-        dev.write('MY'+chr(direction)+chr(1));
-        y_pos += 2*direction - 1;
-
-    elif axis == 'Z':
-        if (z_pos == max_z and direction == DIR1) or (
-            z_pos == 0 and direction == DIR2):
-            return -1
-
-        dev.write('MZ'+chr(direction)+chr(1));
-        z_pos += 2*direction - 1;
-
-    return 0;
 
