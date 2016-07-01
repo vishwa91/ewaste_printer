@@ -78,7 +78,7 @@ uint16_t motor_x_calib(void)
 
 	// Move a step to get status
 	state = _motor_x_move(DIR1);
-	delayMicroseconds(MOTOR_X_CALIB_TIME);
+	delay(MOTOR_X_CALIB_TIME);
 
 	// Debugging
 	digitalWrite(LED, LOW);
@@ -87,14 +87,14 @@ uint16_t motor_x_calib(void)
 	while(state != MOTOR_SW1_ON)
 	{
 		state = _motor_x_move(DIR1);
-		delayMicroseconds(MOTOR_X_CALIB_TIME);
+		delay(MOTOR_X_CALIB_TIME);
 	}
 
 	// Now the motor is at switch 1. We can start count.
 	while(state != MOTOR_SW2_ON)
 	{
 		state = _motor_x_move(DIR2);
-		delayMicroseconds(MOTOR_X_CALIB_TIME);
+		delay(MOTOR_X_CALIB_TIME);
 		nsteps += 1;
 	}
 	digitalWrite(LED, HIGH);
@@ -109,7 +109,7 @@ uint16_t motor_y_calib(void)
 
 	// Move a step to get status
 	state = _motor_y_move(DIR1);
-	delayMicroseconds(MOTOR_X_CALIB_TIME);
+	delay(MOTOR_X_CALIB_TIME);
 
 	// Debugging
 	digitalWrite(LED, LOW);
@@ -118,14 +118,14 @@ uint16_t motor_y_calib(void)
 	while(state != MOTOR_SW1_ON)
 	{
 		state = _motor_y_move(DIR1);
-		delayMicroseconds(MOTOR_X_CALIB_TIME);
+		delay(MOTOR_X_CALIB_TIME);
 	}
 
 	// Now the motor is at switch 1. We can start count.
 	while(state != MOTOR_SW2_ON)
 	{
 		state = _motor_y_move(DIR2);
-		delayMicroseconds(MOTOR_X_CALIB_TIME);
+		delay(MOTOR_X_CALIB_TIME);
 		nsteps += 1;
 	}
 	digitalWrite(LED, HIGH);
@@ -164,7 +164,85 @@ uint16_t motor_z_calib(void)
 	return nsteps;
 }
 
+uint8_t get_x_state(void)
+{
+	return 2*digitalRead(MOTOR_X_SW1) + digitalRead(MOTOR_X_SW2);
+}
+
+uint8_t get_y_state(void)
+{
+	return 2*digitalRead(MOTOR_Y_SW1) + digitalRead(MOTOR_Y_SW2);
+}
+
+uint8_t get_z_state(void)
+{
+	return 2*digitalRead(MOTOR_Z_SW1) + digitalRead(MOTOR_Z_SW2);
+}
+
 // Motion routines
+uint8_t motor_x_move(int dir, uint8_t nsteps)
+{
+	uint8_t steps, state;
+
+	for(steps = 0; steps < nsteps; steps++)
+	{
+		// First get status
+		state = get_x_state();
+
+		if ((state == MOTOR_OK) || (state == MOTOR_SW2_ON && dir == DIR1) ||
+				(state == MOTOR_SW1_ON && dir == DIR2))
+		{
+			_motor_x_move(dir);
+			delay(MOTOR_X_CALIB_TIME);
+		}
+		else
+			return steps+1;
+	}
+	return nsteps;
+}
+
+uint8_t motor_y_move(int dir, uint8_t nsteps)
+{
+	uint8_t steps, state;
+
+	for(steps = 0; steps < nsteps; steps++)
+	{
+		// First get status
+		state = get_y_state();
+
+		if ((state == MOTOR_OK) || (state == MOTOR_SW2_ON && dir == DIR1) ||
+				(state == MOTOR_SW1_ON && dir == DIR2))
+		{
+			_motor_y_move(dir);
+			delay(MOTOR_X_CALIB_TIME);
+		}
+		else
+			return steps+1;
+	}
+	return nsteps;
+}
+
+uint8_t motor_z_move(int dir, uint8_t nsteps)
+{
+	uint8_t steps, state;
+
+	for(steps = 0; steps < nsteps; steps++)
+	{
+		// First get status
+		state = get_z_state();
+
+		if ((state == MOTOR_OK) || (state == MOTOR_SW2_ON && dir == DIR1) ||
+				(state == MOTOR_SW1_ON && dir == DIR2))
+		{
+			_motor_z_move(dir);
+			delay(MOTOR_Z_CALIB_TIME);
+		}
+		else
+			return steps+1;
+	}
+	return nsteps;
+}
+
 uint8_t _motor_x_move(int dir)
 {
 	// Write the direction
@@ -176,7 +254,7 @@ uint8_t _motor_x_move(int dir)
 	digitalWrite(MOTOR_X_STP, LOW);
 
 	// Return switch status
-	return 2*digitalRead(MOTOR_X_SW1) + digitalRead(MOTOR_X_SW2);
+	return get_x_state();
 }
 
 // Motion routines
@@ -191,7 +269,7 @@ uint8_t _motor_y_move(int dir)
 	digitalWrite(MOTOR_Y_STP, LOW);
 
 	// Return switch status
-	return 2*digitalRead(MOTOR_Y_SW1) + digitalRead(MOTOR_Y_SW2);
+	return get_y_state();
 }
 
 uint8_t _motor_z_move(int dir)
@@ -201,7 +279,7 @@ uint8_t _motor_z_move(int dir)
 	else
 		digitalWrite(MOTOR_Z_PLS, HIGH);
 
-	return 2*digitalRead(MOTOR_Z_SW1) + digitalRead(MOTOR_Z_SW2);
+	return get_z_state();
 }
 
 void test_exec(void)
@@ -241,7 +319,16 @@ void test_exec(void)
 
 void enc_isr(void)
 {
+	// Disable interrupts for a while.
+	__disable_irq();
+	
+	// Wait for a while before switching off the motor.
+	delayMicroseconds(10);
+
 	// Simply shut down the DC motor outputs.
 	digitalWrite(MOTOR_Z_PLS, LOW);
 	digitalWrite(MOTOR_Z_MNS, LOW);
+
+	// Reenable interrupts.
+	__enable_irq();
 }

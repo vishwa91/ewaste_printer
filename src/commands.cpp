@@ -63,21 +63,41 @@ void cmd_cali(void)
 
 void cmd_move(void)
 {
+	// Extract direction and number of steps.
+	uint8_t dir, nsteps, steps, state;
+	steps = 0;
+	state = 0;
+
+	dir = usb_in_buffer[2];
+	nsteps = usb_in_buffer[3];
+
+	// Flag busy.
+	busy();
+	
 	// Find out which axis to move
 	switch(usb_in_buffer[1])
 	{
 		case CMD_MOV_X:
-			x_state = _motor_x_move(usb_in_buffer[2]);
+			steps = motor_x_move(dir, nsteps);
+			state = get_x_state();
 			break;
 
 		case CMD_MOV_Y:
-			y_state = _motor_y_move(usb_in_buffer[2]);
+			steps = motor_y_move(dir, nsteps);
+			state = get_y_state();
 			break;
 
 		case CMD_MOV_Z:
-			z_state = _motor_z_move(usb_in_buffer[2]);
+			steps = motor_z_move(dir, nsteps);
+			state = get_z_state();
 			break;
 	}
+	// Flag free.
+	idle();
+
+	// Load return data.
+	usb_out_buffer[0] = state;
+	usb_out_buffer[1] = steps;
 }
 
 void cmd_test(void)
@@ -122,9 +142,9 @@ void cmd_halt(void)
 void cmd_stat(void)
 {
 	// Load all motor statuses
-	usb_out_buffer[0] = 2*digitalRead(MOTOR_X_SW1) + digitalRead(MOTOR_X_SW2);
-	usb_out_buffer[1] = 2*digitalRead(MOTOR_Y_SW1) + digitalRead(MOTOR_Y_SW2);
-	usb_out_buffer[2] = 2*digitalRead(MOTOR_Z_SW1) + digitalRead(MOTOR_Z_SW2);
+	usb_out_buffer[0] = get_x_state();
+	usb_out_buffer[1] = get_y_state();
+	usb_out_buffer[2] = get_z_state();
 
 	// TODO: Might load extruder information later.
 }

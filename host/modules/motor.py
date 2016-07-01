@@ -136,21 +136,23 @@ def _move(axis, direction):
             x_pos == max_x and direction == DIR2):
             return -1
 
-        dev.write('MX'+chr(direction));
+        dev.write('MX'+chr(direction)+chr(1));
         x_pos += 2*direction - 1;
 
     elif axis == 'Y':
-        if y_pos == 0 or y_pos == max_y:
+        if (y_pos == 0 and direction == DIR1) or (
+            y_pos == max_y and direction == DIR2):
             return -1
 
-        dev.write('MY'+chr(direction));
+        dev.write('MY'+chr(direction)+chr(1));
         y_pos += 2*direction - 1;
 
     elif axis == 'Z':
-        if z_pos == 0 or z_pos == max_z:
+        if (z_pos == max_z and direction == DIR1) or (
+            z_pos == 0 and direction == DIR2):
             return -1
 
-        dev.write('MZ'+chr(direction));
+        dev.write('MZ'+chr(direction)+chr(1));
         z_pos += 2*direction - 1;
 
     return 0;

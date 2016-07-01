@@ -39,11 +39,11 @@
 #define MOTOR_SW1_ON 		2 		// Limiting switch 1 is on
 #define MOTOR_SW2_ON 		1 		// Limiting switch 2 is on
 
-#define MOTOR_STP_INTERVAL  20 		// Duration of pulse in microseconds
+#define MOTOR_STP_INTERVAL  100		// Duration of pulse in microseconds
 #define STEP_DURATION 		1 		// Duration of a motor step.
 
-#define MOTOR_X_CALIB_TIME  600		// X and Y calibration step interval
-#define MOTOR_Z_CALIB_TIME 	5 		// Z calibration step interval
+#define MOTOR_X_CALIB_TIME  2		// X and Y calibration step interval
+#define MOTOR_Z_CALIB_TIME 	10 		// Z calibration step interval
 
 #define DIR1 				0 		// Approaching SW1
 #define DIR2 				1 		// Approaching SW2
@@ -51,15 +51,14 @@
 #define ENABLE 				1 		// Enable a functionality
 #define DISABLE 			0 		// Disable a functionality
 
-#define CMD_CALIB 			'C' 	// First USB byte for calibration
-#define CMD_CALIB_X 		'X' 	// Second byte for X calibration
-#define CMD_CALIB_Y 		'Y' 	// Second byte for Y calibration
-#define CMD_CALIB_Z 		'Z' 	// Second byte for Z calibration
-
 void motor_init(void); 							// Motor initialization routines
 
 void busy(void); 								// System busy
 void idle(void); 								// System free
+
+uint8_t get_x_state(void);						// Status of X motor
+uint8_t get_y_state(void);						// Status of Y motor
+uint8_t get_z_state(void);						// Status of Z motor
 
 uint16_t motor_x_calib(void); 					// X axis calibration
 uint16_t motor_y_calib(void); 					// Y axis calibration
@@ -69,9 +68,9 @@ uint8_t _motor_x_move(int dir); 				// Single step X motion
 uint8_t _motor_y_move(int dir); 				// Single step Y motion
 uint8_t _motor_z_move(int dir); 				// Single step Z motion
 
-uint8_t motor_x_move(int dir, int nsteps); 		// X axis motion
-uint8_t motor_y_move(int dir, int nsteps); 		// Y axis motion
-uint8_t motor_z_move(int dir, int nsteps); 		// Z axis motion
+uint8_t motor_x_move(int dir, uint8_t nsteps); 		// X axis motion
+uint8_t motor_y_move(int dir, uint8_t nsteps); 		// Y axis motion
+uint8_t motor_z_move(int dir, uint8_t nsteps); 		// Z axis motion
 
 void test_exec(void);							// Test mode execution
 
