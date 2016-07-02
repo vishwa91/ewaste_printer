@@ -51,7 +51,7 @@ int main(void)
 			test_exec();
 
 		// Send USB data only if status is asked
-		if (usb_in_buffer[1] == CMD_STS)
+		if (usb_in_buffer[0] == CMD_STS || usb_in_buffer[0] ==  CMD_CAL)
 			usb_send();
 
 	}

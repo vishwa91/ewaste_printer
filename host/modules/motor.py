@@ -16,12 +16,11 @@ import cPickle
 # Global variable dev.
 dev = None
 
-# Constants
+# Communication constants
 IDVENDOR = 0x16c0           # USB device vendor ID
 IDPRODUCT = 0x0486          # USB device product ID
 NBYTES = 64                 # Number of bytes to read from the HID device
-DIR1 = 0                    # Direction towards switch 1
-DIR2 = 1                    # Direction towards swithc 2
+TIMEOUT_READ = 500          # Read timeout in milliseconds
 
 # Global position variables
 max_x = 0                   # Maximum X steps
@@ -36,6 +35,8 @@ z_pos = 0                   # Current position of Z
 MOTOR_OK        = 3
 MOTOR_SW1_ON    = 2
 MOTOR_SW2_ON    = 1
+DIR1 = 0                    # Direction towards switch 1
+DIR2 = 1                    # Direction towards swithc 2
 
 def steps_calibrate():
     '''
@@ -62,19 +63,19 @@ def steps_calibrate():
 
     return [xsteps, ysteps, zsteps]
 
-def _steps_calibrate(motor):
+def _steps_calibrate(axis):
     '''
         Function to calibrate the steps for a motor.
 
         Inputs:
-            motor: Motor to calibrate, 'X', 'Y' or 'Z'.
+            axis: Motor to calibrate, 'X', 'Y' or 'Z'.
 
         Outputs:
             nsteps: Steps for the motor axis.
     '''
-    dev.write('C'+motor)
-    time.sleep(1)
-    t = dev.read(NBYTES)
+    dev.write('C'+axis)
+    time.sleep(2)
+    t = dev.read(NBYTES, TIMEOUT_READ)
 
     return 256*ord(t[1]) + ord(t[0])
 
@@ -93,7 +94,7 @@ def get_status():
 
     dev.write('S')
 
-    t = dev.read(NBYTES)
+    t = dev.read(NBYTES, TIMEOUT_READ)
 
     return [ord(t[0]), ord(t[1]), ord(t[2])]
 
