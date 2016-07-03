@@ -17,26 +17,28 @@ import cPickle
 dev = None
 
 # Communication constants
-IDVENDOR = 0x16c0           # USB device vendor ID
-IDPRODUCT = 0x0486          # USB device product ID
-NBYTES = 64                 # Number of bytes to read from the HID device
-TIMEOUT_READ = 500          # Read timeout in milliseconds
+IDVENDOR        = 0x16c0    # USB device vendor ID
+IDPRODUCT       = 0x0486    # USB device product ID
+NBYTES          = 64        # Number of bytes to read from the HID device
+TIMEOUT_READ    = None      # Read timeout in milliseconds
 
 # Global position variables
-max_x = 0                   # Maximum X steps
-max_y = 0                   # Maximum Y steps
-max_z = 0                   # Maximum Z steps
+max_x           = 900       # Maximum X steps
+max_y           = 900       # Maximum Y steps
+max_z           = 150       # Maximum Z steps
 
-x_pos = 0                   # Current position of X
-y_pos = 0                   # Current position of Y
-z_pos = 0                   # Current position of Z
+# Store current position as a dictionary for easy access
+pos = dict();
+pos['X']        = 0         # Current position of X
+pos['Y']        = 0         # Current position of Y
+pos['Z']        = 0         # Current position of Z
 
 # Constants from firmware
-MOTOR_OK        = 3
-MOTOR_SW1_ON    = 2
-MOTOR_SW2_ON    = 1
-DIR1 = 0                    # Direction towards switch 1
-DIR2 = 1                    # Direction towards swithc 2
+MOTOR_OK        = 3         # None of the switches are on.
+MOTOR_SW1_ON    = 2         # Switch 1 is on
+MOTOR_SW2_ON    = 1         # Switch 2 is on
+DIR1            = 0         # Direction towards switch 1
+DIR2            = 1         # Direction towards switch 2
 
 def steps_calibrate():
     '''
@@ -55,12 +57,6 @@ def steps_calibrate():
     ysteps = _steps_calibrate('Y');
     zsteps = _steps_calibrate('Z');
 
-    # Also set the global variables
-    global max_x, max_y, max_z
-    max_x = xsteps;
-    max_y = ysteps;
-    max_z = zsteps;
-
     return [xsteps, ysteps, zsteps]
 
 def _steps_calibrate(axis):
@@ -75,7 +71,7 @@ def _steps_calibrate(axis):
     '''
     dev.write('C'+axis)
     time.sleep(2)
-    t = dev.read(NBYTES, TIMEOUT_READ)
+    t = dev.read(NBYTES, None)
 
     return 256*ord(t[1]) + ord(t[0])
 
@@ -116,7 +112,7 @@ def move(axis, nsteps, direction, delay=0.1):
         dev.write('M'+axis+chr(direction)+chr(1))
 
         # Get status to see if we have hit border.
-        [sx, sy, sz] = get_status();
+        [sx, sy, sz] = get_status()
         if axis == 'X':
             status = sx
         elif axis == 'Y':
@@ -128,8 +124,60 @@ def move(axis, nsteps, direction, delay=0.1):
             direction == DIR2 and status == MOTOR_SW2_ON):
             return moved_steps
 
+        # Update current position
+        if direction == DIR1:
+            pos[axis] += 1
+        else:
+            pos[axis] -= 1
+
         moved_steps += 1
         time.sleep(delay)
 
     return moved_steps
 
+def move_z_down(delay=0.1):
+    '''
+        Function to move Z axis down. Moving down is an unreliable operation
+        on the z-axis and hence we move till the first switch is on.
+
+        Inputs:
+            delay: Delay between steps.
+
+        Outputs:
+            None
+    '''
+
+    # Of course we know that the steps aren't greater than 200. So let's use
+    # that.
+    move('Z', 200, DIR2, delay)
+
+def reset(delay=0.001):
+    '''
+        Function to reset the position of the three axes to origin.
+
+        Inputs:
+            delay: Delay between steps.
+
+        Outputs:
+            None.
+    '''
+
+    # If the X or Y axes are touching SW2 initially, it might lose steps
+    move('X', 100, DIR1, delay)
+    move('Y', 100, DIR1, delay)
+
+    # Now simply move by a large number of steps
+    move('X', 1200, DIR2, delay)
+    move('Y', 1200, DIR2, delay)
+    move('Z', 200, DIR2, delay)
+
+    # Reset positions
+    pos['X'] = 0
+    pos['Y'] = 0
+    pos['Z'] = 0
+
+def movexy(xsteps, ysteps, delay=0.01):
+    '''
+        Function to move the XY stage for a given x steps and y steps.
+    '''
+    pass

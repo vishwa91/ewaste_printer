@@ -42,8 +42,8 @@
 #define MOTOR_STP_INTERVAL  100		// Duration of pulse in microseconds
 #define STEP_DURATION 		1 		// Duration of a motor step.
 
-#define MOTOR_X_CALIB_TIME  1		// X and Y calibration step interval
-#define MOTOR_Z_CALIB_TIME 	5 		// Z calibration step interval
+#define MOTOR_X_CALIB_TIME  600		// X and Y calibration step interval
+#define MOTOR_Z_CALIB_TIME 	2 		// Z calibration step interval
 #define MOTOR_Z_PWM_VAL 	180 	// Z axis PWM value
 
 #define DIR1 				0 		// Approaching SW1
@@ -69,9 +69,10 @@ uint8_t _motor_x_move(int dir); 				// Single step X motion
 uint8_t _motor_y_move(int dir); 				// Single step Y motion
 uint8_t _motor_z_move(int dir); 				// Single step Z motion
 
-uint8_t motor_x_move(int dir, uint8_t nsteps); 		// X axis motion
-uint8_t motor_y_move(int dir, uint8_t nsteps); 		// Y axis motion
-uint8_t motor_z_move(int dir, uint8_t nsteps); 		// Z axis motion
+// Multi step motion
+uint8_t motor_x_move(int dir, uint8_t nsteps, uint16_t step_delay);
+uint8_t motor_y_move(int dir, uint8_t nsteps, uint16_t step_delay);
+uint8_t motor_z_move(int dir, uint8_t nsteps, uint16_t step_delay);
 
 void test_exec(void);							// Test mode execution
 

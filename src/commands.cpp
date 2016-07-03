@@ -65,11 +65,14 @@ void cmd_move(void)
 {
 	// Extract direction and number of steps.
 	uint8_t dir, nsteps, steps, state;
+	uint16_t step_delay = 0;
+
 	steps = 0;
 	state = 0;
 
 	dir = usb_in_buffer[2];
 	nsteps = usb_in_buffer[3];
+	step_delay = usb_in_buffer[4] + 256*usb_in_buffer[5];
 
 	// Flag busy.
 	busy();
@@ -78,17 +81,17 @@ void cmd_move(void)
 	switch(usb_in_buffer[1])
 	{
 		case CMD_MOV_X:
-			steps = motor_x_move(dir, nsteps);
+			steps = motor_x_move(dir, nsteps, step_delay);
 			state = get_x_state();
 			break;
 
 		case CMD_MOV_Y:
-			steps = motor_y_move(dir, nsteps);
+			steps = motor_y_move(dir, nsteps, step_delay);
 			state = get_y_state();
 			break;
 
 		case CMD_MOV_Z:
-			steps = motor_z_move(dir, nsteps);
+			steps = motor_z_move(dir, nsteps, step_delay);
 			state = get_z_state();
 			break;
 	}
