@@ -27,8 +27,9 @@ void cmd_exec(void)
 			cmd_halt();
 			break;
 
-		case CMD_STS:
-			cmd_stat();
+		case CMD_QRY:
+			cmd_query();
+			usb_send();
 			break;
 
 		default:
@@ -142,12 +143,33 @@ void cmd_halt(void)
 }
 
 
-void cmd_stat(void)
+void cmd_query(void)
 {
-	// Load all motor statuses
-	usb_out_buffer[0] = get_x_state();
-	usb_out_buffer[1] = get_y_state();
-	usb_out_buffer[2] = get_z_state();
+	switch(usb_in_buffer[1])
+	{
+		case CMD_QRY_S:
+			// Load all motor statuses
+			usb_out_buffer[0] = get_x_state();
+			usb_out_buffer[1] = get_y_state();
+			usb_out_buffer[2] = get_z_state();
+			break;
 
-	// TODO: Might load extruder information later.
+		case CMD_QRY_P:
+			// First two bytes for X position
+			usb_out_buffer[0] = (uint8_t)(x_pos & 0xff);
+			usb_out_buffer[1] = (uint8_t)((x_pos >> 8) & 0xff);
+
+			// Next two for Y position
+			usb_out_buffer[2] = (uint8_t)(y_pos & 0xff);
+			usb_out_buffer[3] = (uint8_t)((y_pos >> 8) & 0xff);
+
+			// And finally Z position
+			usb_out_buffer[4] = (uint8_t)(z_pos & 0xff);
+			usb_out_buffer[5] = (uint8_t)((z_pos >> 8) & 0xff);
+			break;
+
+		case CMD_QRY_C:
+			// Nothing to do, as data was loaded when calibration was done.
+			break;
+	}
 }

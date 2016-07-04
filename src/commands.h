@@ -11,7 +11,7 @@
 #define CMD_MOV 	'M' 	// Move
 #define CMD_TST 	'T' 	// Testing motor
 #define CMD_HLT 	'H' 	// Halt motor
-#define CMD_STS 	'S' 	// Status of machine
+#define CMD_QRY 	'Q' 	// Queries for the machine
 
 // Second byte for specifics of the command
 #define CMD_CAL_X 	'X' 	// Calibrate X
@@ -30,11 +30,15 @@
 #define CMD_HLT_Y 	'Y' 	// Halt motor Y
 #define CMD_HLT_Z 	'Z' 	// Halt motor Z
 
+#define CMD_QRY_S 	'S' 	// Switch statuses
+#define CMD_QRY_P 	'P' 	// Position of the motors
+#define CMD_QRY_C 	'C' 	// Calibration query
+
 void cmd_exec(void); 		// Master command execution function
 void cmd_cali(void); 		// Function to execute calibration comands
 void cmd_move(void);  		// Function to execute move commands		
 void cmd_test(void); 		// Function to execute motor test commands
 void cmd_halt(void); 		// Function to execute motor halt commands
-void cmd_stat(void); 		// Function to get machine status
+void cmd_query(void); 		// Function to get query from machine
 
 #endif

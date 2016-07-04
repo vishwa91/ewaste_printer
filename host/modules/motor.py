@@ -20,7 +20,7 @@ dev = None
 IDVENDOR        = 0x16c0    # USB device vendor ID
 IDPRODUCT       = 0x0486    # USB device product ID
 NBYTES          = 64        # Number of bytes to read from the HID device
-TIMEOUT_READ    = None      # Read timeout in milliseconds
+TIMEOUT_READ    = 2000      # Read timeout in milliseconds
 
 # Global position variables
 max_x           = 900       # Maximum X steps
@@ -71,6 +71,7 @@ def _steps_calibrate(axis):
     '''
     dev.write('C'+axis)
     time.sleep(2)
+    dev.write('QC')
     t = dev.read(NBYTES, None)
 
     return 256*ord(t[1]) + ord(t[0])
@@ -88,7 +89,7 @@ def get_status():
             zstate: Z axis state.
     '''
 
-    dev.write('S')
+    dev.write('QS')
 
     t = dev.read(NBYTES, TIMEOUT_READ)
 

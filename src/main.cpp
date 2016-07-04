@@ -49,10 +49,5 @@ int main(void)
 		// If any test mode is on, complete the routine.
 		if (x_test || y_test || z_test)
 			test_exec();
-
-		// Send USB data only if status is asked
-		if (usb_in_buffer[0] == CMD_STS || usb_in_buffer[0] ==  CMD_CAL)
-			usb_send();
-
 	}
 }

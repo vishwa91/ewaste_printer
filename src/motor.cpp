@@ -19,6 +19,10 @@ uint8_t x_test = DISABLE;
 uint8_t y_test = DISABLE;
 uint8_t z_test = DISABLE;
 
+uint16_t x_pos = 0;
+uint16_t y_pos = 0;
+uint16_t z_pos = 0;
+
 void motor_init(void)
 {
 	// Set directions for all pins
@@ -316,7 +320,7 @@ void test_exec(void)
 		_motor_z_move(z_dir);
 	}
 
-	delay(STEP_DURATION);
+	delay(MOTOR_X_CALIB_TIME);
 }
 
 void enc_isr(void)

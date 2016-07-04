@@ -40,11 +40,10 @@
 #define MOTOR_SW2_ON 		1 		// Limiting switch 2 is on
 
 #define MOTOR_STP_INTERVAL  100		// Duration of pulse in microseconds
-#define STEP_DURATION 		1 		// Duration of a motor step.
 
 #define MOTOR_X_CALIB_TIME  600		// X and Y calibration step interval
-#define MOTOR_Z_CALIB_TIME 	2 		// Z calibration step interval
-#define MOTOR_Z_PWM_VAL 	180 	// Z axis PWM value
+#define MOTOR_Z_CALIB_TIME 	20 		// Z calibration step interval
+#define MOTOR_Z_PWM_VAL 	255 	// Z axis PWM value
 
 #define DIR1 				0 		// Approaching SW1
 #define DIR2 				1 		// Approaching SW2
@@ -82,5 +81,6 @@ void enc_isr(void); 							// Encoder ISR
 extern uint8_t x_state, y_state, z_state;
 extern uint8_t x_test, y_test, z_test;
 extern uint8_t x_dir, y_dir, z_dir;
+extern uint16_t x_pos, y_pos, z_pos;
 
 #endif
