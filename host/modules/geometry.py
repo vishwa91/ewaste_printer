@@ -59,5 +59,3 @@ def goto2D(pos, delay=0.01):
     # Convert to incremental steps
     xsteps = xint[1:] - xint[:-1]
     ysteps = yint[1:] - yint[:-1]
-
-

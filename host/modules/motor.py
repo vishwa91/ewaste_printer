@@ -76,6 +76,27 @@ def _steps_calibrate(axis):
 
     return 256*ord(t[1]) + ord(t[0])
 
+def get_position():
+    '''
+        Function to get position from the firmware itself.
+
+        Inputs:
+            None.
+
+        Outputs:
+            xpos: X axis position with respect to switch 2.
+            ypos: Y axis position with respect to switch 2.
+            zpos: Z axis position with respect to switch 1.
+    '''
+    dev.write('QP')
+    t = dev.read(NBYTES, TIMEOUT_READ)
+
+    xpos = ord(t[0]) + ord(t[1])*256
+    ypos = ord(t[2]) + ord(t[3])*256
+    zpos = ord(t[4]) + ord(t[5])*256
+
+    return [xpos, ypos, zpos]
+
 def get_status():
     '''
         Function to get system status.

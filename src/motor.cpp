@@ -11,17 +11,17 @@ uint8_t x_state = MOTOR_OK;
 uint8_t y_state = MOTOR_OK;
 uint8_t z_state = MOTOR_OK;
 
-uint8_t x_dir = DIR1;
-uint8_t y_dir = DIR1;
-uint8_t z_dir = DIR1;
+volatile uint8_t x_dir = DIR1;
+volatile uint8_t y_dir = DIR1;
+volatile uint8_t z_dir = DIR1;
 
 uint8_t x_test = DISABLE;
 uint8_t y_test = DISABLE;
 uint8_t z_test = DISABLE;
 
-uint16_t x_pos = 0;
-uint16_t y_pos = 0;
-uint16_t z_pos = 0;
+volatile uint16_t x_pos = 0;
+volatile uint16_t y_pos = 0;
+volatile uint16_t z_pos = 0;
 
 // ISR variable
 volatile uint8_t is_running = DISABLE;
@@ -106,6 +106,9 @@ uint16_t motor_x_calib(void)
 	}
 	digitalWrite(LED, HIGH);
 
+	// Reset position
+	x_pos = 0;
+
 	return nsteps;
 }
 
@@ -137,6 +140,9 @@ uint16_t motor_y_calib(void)
 	}
 	digitalWrite(LED, HIGH);
 
+	// Reset position
+	y_pos = 0;
+
 	return nsteps;
 }
 
@@ -167,6 +173,9 @@ uint16_t motor_z_calib(void)
 		nsteps += 1;
 	}
 	digitalWrite(LED, HIGH);
+
+	// Reset position
+	z_pos = 0;
 
 	return nsteps;
 }
@@ -260,6 +269,9 @@ uint8_t _motor_x_move(int dir)
 	delayMicroseconds(MOTOR_STP_INTERVAL);
 	digitalWrite(MOTOR_X_STP, LOW);
 
+	// Update position
+	x_pos -= 2*dir - 1;
+
 	// Return switch status
 	return get_x_state();
 }
@@ -275,13 +287,19 @@ uint8_t _motor_y_move(int dir)
 	delayMicroseconds(MOTOR_STP_INTERVAL);
 	digitalWrite(MOTOR_Y_STP, LOW);
 
+	// Update position
+	y_pos -= 2*dir - 1;
+
 	// Return switch status
 	return get_y_state();
 }
 
 uint8_t _motor_z_move(int dir)
 {
+	__enable_irq();
 	is_running = ENABLE;
+	z_dir = dir;
+
 	if (dir == DIR1)
 	{
 		//analogWrite(MOTOR_Z_MNS, MOTOR_Z_PWM_VAL);
@@ -350,9 +368,8 @@ void enc_isr(void)
 	
 	// Simply shut down the DC motor outputs.
 	is_running = DISABLE;
+	z_pos += 2*z_dir -1;
+
 	digitalWrite(MOTOR_Z_PLS, LOW);
 	digitalWrite(MOTOR_Z_MNS, LOW);
-
-	// Reenable interrupts.
-	__enable_irq();
 }
