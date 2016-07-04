@@ -40,6 +40,7 @@
 #define MOTOR_SW2_ON 		1 		// Limiting switch 2 is on
 
 #define MOTOR_STP_INTERVAL  100		// Duration of pulse in microseconds
+#define MOTOR_Z_INTERVAL 	400		// Short burst time for Z axis
 
 #define MOTOR_X_CALIB_TIME  600		// X and Y calibration step interval
 #define MOTOR_Z_CALIB_TIME 	20 		// Z calibration step interval
@@ -83,4 +84,6 @@ extern uint8_t x_test, y_test, z_test;
 extern uint8_t x_dir, y_dir, z_dir;
 extern uint16_t x_pos, y_pos, z_pos;
 
+// ISR variable
+extern volatile uint8_t is_running;
 #endif

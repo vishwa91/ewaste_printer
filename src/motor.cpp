@@ -23,6 +23,9 @@ uint16_t x_pos = 0;
 uint16_t y_pos = 0;
 uint16_t z_pos = 0;
 
+// ISR variable
+volatile uint8_t is_running = DISABLE;
+
 void motor_init(void)
 {
 	// Set directions for all pins
@@ -278,12 +281,29 @@ uint8_t _motor_y_move(int dir)
 
 uint8_t _motor_z_move(int dir)
 {
+	is_running = ENABLE;
 	if (dir == DIR1)
-		//digitalWrite(MOTOR_Z_MNS, HIGH);
-		analogWrite(MOTOR_Z_MNS, MOTOR_Z_PWM_VAL);
+	{
+		//analogWrite(MOTOR_Z_MNS, MOTOR_Z_PWM_VAL);
+		while(is_running == ENABLE)
+		{
+			digitalWrite(MOTOR_Z_MNS, HIGH);
+			delayMicroseconds(MOTOR_Z_INTERVAL);
+			digitalWrite(MOTOR_Z_MNS, LOW);
+			delayMicroseconds(MOTOR_Z_INTERVAL/2);
+		}
+	}
 	else
-		//digitalWrite(MOTOR_Z_PLS, HIGH);
-		analogWrite(MOTOR_Z_PLS, MOTOR_Z_PWM_VAL);
+	{
+		//analogWrite(MOTOR_Z_PLS, MOTOR_Z_PWM_VAL);
+		while(is_running == ENABLE)
+		{
+			digitalWrite(MOTOR_Z_PLS, HIGH);
+			delayMicroseconds(MOTOR_Z_INTERVAL);
+			digitalWrite(MOTOR_Z_PLS, LOW);
+			delayMicroseconds(MOTOR_Z_INTERVAL/2);
+		}
+	}
 
 	return get_z_state();
 }
@@ -329,6 +349,7 @@ void enc_isr(void)
 	__disable_irq();
 	
 	// Simply shut down the DC motor outputs.
+	is_running = DISABLE;
 	digitalWrite(MOTOR_Z_PLS, LOW);
 	digitalWrite(MOTOR_Z_MNS, LOW);
 

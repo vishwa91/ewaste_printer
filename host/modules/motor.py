@@ -152,6 +152,22 @@ def move_z_down(delay=0.1):
     # that.
     move('Z', 200, DIR2, delay)
 
+def move_z_up(delay=0.1):
+    '''
+        Function to move Z axis up. Will be used when 2D plot testing.
+
+        Inputs:
+            delay: Delay between steps.
+
+        Outputs:
+            None
+    '''
+
+    # Of course we know that the steps aren't greater than 200. So let's use
+    # that.
+    move('Z', 200, DIR1, delay)
+
+
 def reset(delay=0.001):
     '''
         Function to reset the position of the three axes to origin.
