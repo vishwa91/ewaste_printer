@@ -18,4 +18,9 @@ http://www.instructables.com/id/eWaste-60-3DPrinter/
 1. Teensy template at http://github.com/apmorton/teensy-template
 2. Python HID module at https://pypi.python.org/pypi/hid
 
+### Notes
+1. Even though two stepper motors and one DC motor with encoder has been used,
+  it is easy to replace the DC motor with stepper motor. On the firmware side,
+  have a look at X axis or Y axis controls. The same would apply to a third
+  axis as well.
 
