@@ -14,3 +14,7 @@ build
 
 # We don't have to track our tests folder
 tests
+
+# Scrap folder is an incredible test platform, but ignore.
+Makefile.scrap
+scrap/
