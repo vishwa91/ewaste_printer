@@ -24,9 +24,9 @@
 
 #define MOTOR_Z_SW1 		14 		// Limiting switch 1
 #define MOTOR_Z_SW2 		15 		// Limiting switch 2
-#define MOTOR_Z_ENC 		10 		// Encoder input
-#define MOTOR_Z_PLS 		12 		// Motor plus
-#define MOTOR_Z_MNS 		11 		// Motor minus
+#define MOTOR_Z_ENC 		12 		// Encoder input
+#define MOTOR_Z_PLS 		10 		// Motor plus
+#define MOTOR_Z_MNS 		 9 		// Motor minus
 
 #define MOTOR_E_DIR 		9 		// Motor direction pin
 #define MOTOR_E_STP 		8 		// Motor step pin
