@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <avr_emulation.h>
+#include <IntervalTimer.h>
 
 #define LED 				13 		// LED for debugging purposes
 
@@ -25,8 +26,8 @@
 #define MOTOR_Z_SW1 		14 		// Limiting switch 1
 #define MOTOR_Z_SW2 		15 		// Limiting switch 2
 #define MOTOR_Z_ENC 		12 		// Encoder input
-#define MOTOR_Z_PLS 		10 		// Motor plus
-#define MOTOR_Z_MNS 		 9 		// Motor minus
+#define MOTOR_Z_PLS 		9 		// Motor plus
+#define MOTOR_Z_MNS 		10 		// Motor minus
 
 #define MOTOR_E_DIR 		9 		// Motor direction pin
 #define MOTOR_E_STP 		8 		// Motor step pin
@@ -44,7 +45,9 @@
 
 #define MOTOR_X_CALIB_TIME  600		// X and Y calibration step interval
 #define MOTOR_Z_CALIB_TIME 	10 		// Z calibration step interval
-#define MOTOR_Z_PWM_VAL 	255 	// Z axis PWM value
+#define MOTOR_Z_PWM_VAL 	180 	// Z axis PWM value
+
+#define POS_TIMER 			10000 	// Microseconds between z motor polling
 
 #define DIR1 				0 		// Approaching SW1
 #define DIR2 				1 		// Approaching SW2
@@ -75,15 +78,16 @@ uint8_t motor_y_move(int dir, uint8_t nsteps, uint16_t step_delay);
 uint8_t motor_z_move(int dir, uint8_t nsteps, uint16_t step_delay);
 
 void test_exec(void);							// Test mode execution
-
 void enc_isr(void); 							// Encoder ISR
+void pos_func(void); 							// Polling timer for Z position
 
 // Global motor related variables
-extern uint8_t x_state, y_state, z_state;
-extern uint8_t x_test, y_test, z_test;
-extern volatile uint8_t x_dir, y_dir, z_dir;
-extern volatile uint16_t x_pos, y_pos, z_pos;
+extern uint8_t x_state, y_state, z_state; 		// Motor states
+extern uint8_t x_test, y_test, z_test; 			// Motor test modes
+extern volatile uint8_t x_dir, y_dir, z_dir;  	// Motor direction
+extern volatile int x_pos, y_pos, z_pos; 		// Motor position
+extern volatile int z_max, z_pos_cur; 			// Z position helper variables
 
-// ISR variable
-extern volatile uint8_t is_running;
+// Z position polling timer
+extern IntervalTimer pos_timer_z;
 #endif

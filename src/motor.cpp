@@ -19,12 +19,14 @@ uint8_t x_test = DISABLE;
 uint8_t y_test = DISABLE;
 uint8_t z_test = DISABLE;
 
-volatile uint16_t x_pos = 0;
-volatile uint16_t y_pos = 0;
-volatile uint16_t z_pos = 0;
+volatile int x_pos = 0;
+volatile int y_pos = 0;
+volatile int z_pos = 0;
 
-// ISR variable
-volatile uint8_t is_running = DISABLE;
+volatile int z_max = 0;
+volatile int z_pos_cur = 0;
+
+IntervalTimer pos_timer_z;
 
 void motor_init(void)
 {
@@ -148,36 +150,48 @@ uint16_t motor_y_calib(void)
 
 uint16_t motor_z_calib(void)
 {
-	uint16_t nsteps = 0;
-	uint8_t state;
-
-	// Move a step to get status
-	state = _motor_z_move(DIR2);
-	delay(MOTOR_Z_CALIB_TIME);
-
 	// Debugging
-	digitalWrite(LED, LOW);
+	busy();
+
+	// Start with shutting down both pins
+	analogWrite(MOTOR_Z_PLS, 0);
+	analogWrite(MOTOR_Z_MNS, 0);
+
+	// Shut down position timer now.
+	pos_timer_z.end();
 
 	// Move towards SW1 and then halt.
-	while(state != MOTOR_SW2_ON)
+	z_dir = DIR2;
+	while(digitalRead(MOTOR_Z_SW2) == 1)
 	{
-		state = _motor_z_move(DIR2);
+		analogWrite(MOTOR_Z_PLS, MOTOR_Z_PWM_VAL);
 		delay(MOTOR_Z_CALIB_TIME);
 	}
+	analogWrite(MOTOR_Z_PLS, 0);
+
+	// Reset variables.
+	z_pos_cur = 0;
+	z_dir = DIR1;
 
 	// Now the motor is at switch 1. We can start count.
-	while(state != MOTOR_SW1_ON)
+	while(digitalRead(MOTOR_Z_SW1) == 1)
 	{
-		state = _motor_z_move(DIR1);
+		analogWrite(MOTOR_Z_MNS, MOTOR_Z_PWM_VAL);
 		delay(MOTOR_Z_CALIB_TIME);
-		nsteps += 1;
 	}
-	digitalWrite(LED, HIGH);
+	analogWrite(MOTOR_Z_MNS, 0);
 
-	// Reset position
-	z_pos = 0;
+	// Wait for half a second and then we are done.
+	delay(500);
+	idle();
 
-	return nsteps;
+	// Now write the global variables.
+	z_pos = z_max = z_pos_cur;
+
+	// Switch on the position polling timer.
+	pos_timer_z.begin(pos_func, POS_TIMER);
+
+	return z_max;
 }
 
 uint8_t get_x_state(void)
@@ -296,32 +310,18 @@ uint8_t _motor_y_move(int dir)
 
 uint8_t _motor_z_move(int dir)
 {
-	__enable_irq();
-	is_running = ENABLE;
-	z_dir = dir;
-
+	// Just change the current position. Position timer will take care.
 	if (dir == DIR1)
-	{
-		//analogWrite(MOTOR_Z_MNS, MOTOR_Z_PWM_VAL);
-		while(is_running == ENABLE)
-		{
-			digitalWrite(MOTOR_Z_MNS, HIGH);
-			delayMicroseconds(MOTOR_Z_INTERVAL);
-			digitalWrite(MOTOR_Z_MNS, LOW);
-			delayMicroseconds(MOTOR_Z_INTERVAL/2);
-		}
-	}
+		z_pos -= 1;
 	else
-	{
-		//analogWrite(MOTOR_Z_PLS, MOTOR_Z_PWM_VAL);
-		while(is_running == ENABLE)
-		{
-			digitalWrite(MOTOR_Z_PLS, HIGH);
-			delayMicroseconds(MOTOR_Z_INTERVAL);
-			digitalWrite(MOTOR_Z_PLS, LOW);
-			delayMicroseconds(MOTOR_Z_INTERVAL/2);
-		}
-	}
+		z_pos += 1;
+
+	if (z_pos > z_max)
+		z_pos = z_max;
+	if (z_pos < 0)
+		z_pos = 0;
+
+	delayMicroseconds(MOTOR_Z_INTERVAL);
 
 	return get_z_state();
 }
@@ -363,13 +363,35 @@ void test_exec(void)
 
 void enc_isr(void)
 {
-	// Disable interrupts for a while.
-	__disable_irq();
-	
-	// Simply shut down the DC motor outputs.
-	is_running = DISABLE;
-	z_pos += 2*z_dir -1;
+	// Shut down the motor outputs.
+	analogWrite(MOTOR_Z_PLS, 0);
+	analogWrite(MOTOR_Z_MNS, 0);
 
-	digitalWrite(MOTOR_Z_PLS, LOW);
-	digitalWrite(MOTOR_Z_MNS, LOW);
+	if (z_dir == DIR1)
+		z_pos_cur += 1;
+	else if (z_dir == DIR2)
+		z_pos_cur -= 1;
+}
+
+void pos_func(void)
+{
+	// Regularly poll for position update.
+	if (z_pos_cur > z_pos)
+	{
+		analogWrite(MOTOR_Z_PLS, MOTOR_Z_PWM_VAL);
+		analogWrite(MOTOR_Z_MNS, 0);
+		z_dir = DIR2;
+	}
+	else if (z_pos_cur < z_pos)
+	{
+		analogWrite(MOTOR_Z_PLS, 0);
+		analogWrite(MOTOR_Z_MNS, MOTOR_Z_PWM_VAL);
+		z_dir = DIR1;
+	}
+	else
+	{
+		analogWrite(MOTOR_Z_PLS, 0);
+		analogWrite(MOTOR_Z_MNS, 0);
+	}
+
 }
